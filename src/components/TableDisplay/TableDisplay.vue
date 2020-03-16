@@ -4,6 +4,12 @@
       <div class="table-title-container section-title">
         <slot name="table-title" />
       </div>
+      <div class="table-actions-container">
+        <div @click="setFilteredBy('expiration')" v-if="assetType === 'namespace'">
+          <Checkbox :value="filteredBy.filteringType === 'show'" />
+          <span>{{ $t('Show_expired_namespaces') }}</span>
+        </div>
+      </div>
     </div>
     <div
       :class="[                                         
@@ -38,6 +44,7 @@
           v-for="(rowValues, index) in currentPageRows"
           :key="index"
           :row-values="rowValues"
+          :namespace-hex-id="namespaceHexId"
           :asset-type="assetType"
           :owned-asset-hex-ids="ownedAssetHexIds"
           @on-show-alias-form="showAliasForm"

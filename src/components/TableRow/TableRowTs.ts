@@ -41,6 +41,12 @@ export class TableRowTs extends Vue {
    */
   @Prop({default: {}}) rowValues: any
 
+    /**
+   * namespace hexId
+   * @type {any}
+   */
+  @Prop({default: []}) namespaceHexId: any
+
   /**
    * Owned assets hex ids
    * @type {string[]}
@@ -76,7 +82,7 @@ export class TableRowTs extends Vue {
    */
   protected get hasAvailableActions(): boolean {
     if (this.rowValues.expiration === 'expired') return false
-    return this.ownedAssetHexIds.findIndex(hexId => hexId === this.rowValues.hexId) > -1
+    return this.ownedAssetHexIds.findIndex((hexId, index) => hexId === (this.rowValues.hexId ? this.rowValues.hexId : this.namespaceHexId[index].hexId)) > -1
   }
 
   /**

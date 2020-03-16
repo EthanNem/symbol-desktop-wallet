@@ -16,7 +16,7 @@
 // external dependencies
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import {mapGetters} from 'vuex'
-import {NamespaceId, AliasAction, MosaicId, Address, MosaicInfo, NamespaceInfo} from 'symbol-sdk'
+import {NamespaceId, AliasAction, MosaicId, Address, MosaicInfo, NamespaceInfo, NamespaceService} from 'symbol-sdk'
 
 // internal dependencies
 import {
@@ -191,6 +191,17 @@ export class TableDisplayTs extends Vue {
     return this.getService().getTableRows()
   }
 
+  // get namespace hexId
+  protected get namespaceHexId(): any[] {
+    // - get owned namespaces from the store
+    const ownedNamespaces: NamespaceInfo[] = this.$store.getters['wallet/currentWalletOwnedNamespaces']
+    return ownedNamespaces.map((namespaceInfo) => {
+      return {
+        'hexId': namespaceInfo.id.toHex(),
+      }
+    })
+  }
+
   /**
    * Values displayed in the table
    * @readonly
@@ -246,6 +257,7 @@ export class TableDisplayTs extends Vue {
     this.setDefaultFiltering()
     // await this.refresh()
     this.setDefaultSorting()
+    console.log(this.namespaceHexId,'11111111')
   }
 
   /**

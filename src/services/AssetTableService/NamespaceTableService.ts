@@ -37,12 +37,13 @@ export class NamespaceTableService extends AssetTableService {
    */
   public getTableFields(): TableField[] {
     return [
-      {name: 'hexId', label: 'table_header_hex_id'},
       {name: 'name', label: 'table_header_name'},
       {name: 'expiration', label: 'table_header_expiration'},
+      {name: 'last expiration', label: 'table_header_last_expiration'},
       {name: 'expired', label: 'table_header_expired'},
-      {name: 'aliasIdentifier', label: 'table_header_alias_identifier'},
+      {name: 'bind', label: 'table_header_alias_bind'},
       {name: 'aliasType', label: 'table_header_alias_type'},
+      {name: 'creation time', label: 'table_header_alias_time'},
     ]
   }
 
@@ -58,17 +59,19 @@ export class NamespaceTableService extends AssetTableService {
     const service = new NamespaceService(this.$store)
 
     return ownedNamespaces.map((namespaceInfo) => {
-      const {expired, expiration} = this.getExpiration(namespaceInfo)
+      const {expired, expiration, lastExpiration} = this.getExpiration(namespaceInfo)
       const model = service.getNamespaceSync(namespaceInfo.id)
       if (!model) return null
 
       return {
-        'hexId': namespaceInfo.id.toHex(),
+        // 'hexId': namespaceInfo.id.toHex(),
         'name': model.values.get('name'),
         'expiration': expiration,
+        'last expiration': lastExpiration,
         'expired': expired,
-        'aliasIdentifier': this.getAliasIdentifier(namespaceInfo),
+        'bind': this.getAliasIdentifier(namespaceInfo) === 'N/A' ? false : true,
         'aliasType': this.getAliasType(namespaceInfo),
+        'creation time': '--',
       }
     }).filter(x => x) // filter out namespaces that are not yet available
   }
@@ -104,7 +107,7 @@ export class NamespaceTableService extends AssetTableService {
    */
   private getExpiration (
     namespaceInfo: NamespaceInfo,
-  ): {expiration: string, expired: boolean} {
+  ): {expiration: string, expired: boolean ,lastExpiration:string} {
     const {currentHeight} = this
     const endHeight = namespaceInfo.endHeight.compact()
     const networkConfig = this.$store.getters['network/config']
@@ -113,10 +116,13 @@ export class NamespaceTableService extends AssetTableService {
     const expired = currentHeight > endHeight - namespaceGracePeriodDuration
     const expiredIn = endHeight - namespaceGracePeriodDuration - currentHeight
     const deletedIn = endHeight - currentHeight
-    const expiration = expired
+    const lastExpiration = expired  
       ? TimeHelpers.durationToRelativeTime(expiredIn)
       : TimeHelpers.durationToRelativeTime(deletedIn)
+    const  expiration= expired
+      ? TimeHelpers.durationToRelativeTime(expiredIn)
+      : TimeHelpers.durationToRelativeTime(endHeight)
 
-    return {expired, expiration}
+    return {expired, expiration, lastExpiration}
   }
 }
